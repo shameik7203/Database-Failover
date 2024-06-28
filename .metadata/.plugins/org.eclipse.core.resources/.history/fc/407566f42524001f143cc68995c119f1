@@ -1,0 +1,54 @@
+package com.example.databasefailover;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import com.mongodb.client.MongoCollection;
+
+import jakarta.servlet.Servlet;
+
+import org.bson.Document;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+
+public class DatabaseServlet extends HttpServlet implements Servlet {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String data = req.getParameter("data");
+
+        boolean mongoAvailable = MongoDBConnection.isAvailable();
+        boolean elasticSearchAvailable = ElasticSearchConnection.isAvailable();
+
+        if (mongoAvailable) {
+            storeInMongoDB(data);
+        } else if (elasticSearchAvailable) {
+            storeInElasticSearch(data);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            resp.getWriter().write("Both databases are unavailable");
+            return;
+        }
+
+        resp.getWriter().write("Data processed");
+    }
+
+    private void storeInMongoDB(String data) {
+        MongoCollection<Document> collection = MongoDBConnection.getDatabase().getCollection("mycollection");
+        Document document = new Document("data", data);
+        collection.insertOne(document);
+    }
+
+    private void storeInElasticSearch(String data) throws IOException {
+        try (RestHighLevelClient client = ElasticSearchConnection.getClient()) {
+            IndexRequest request = new IndexRequest("myindex")
+                    .source("data", data);
+            IndexResponse response = client.index(request, RequestOptions.DEFAULT);
+        }
+    }
+}
+
+

@@ -1,0 +1,32 @@
+package com.example.databasefailover;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.MainResponse;
+
+import java.io.IOException;
+
+public class ElasticSearchConnection {
+    private static final String HOST = "localhost";
+    private static final int PORT = 9200;
+
+    public static RestHighLevelClient getClient() {
+        return new RestHighLevelClient(
+                RestClient.builder(
+                        new HttpHost(HOST, PORT, "http")
+                )
+        );
+    }
+
+    public static boolean isAvailable() {
+        try (RestHighLevelClient client = getClient()) {
+            MainResponse response = client.info(RequestOptions.DEFAULT);
+            return response != null;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+}
+

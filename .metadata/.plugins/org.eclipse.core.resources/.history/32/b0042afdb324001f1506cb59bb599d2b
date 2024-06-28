@@ -1,0 +1,11 @@
+package com.example.node.startup;
+
+import com.example.databasefailover.MongoDBConnection;
+
+public class BootsTrapper {
+
+	public static void main(String[] args) {
+		
+		MongoDBConnection.getInstance().createConnection();
+	}
+}

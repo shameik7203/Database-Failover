@@ -1,0 +1,8 @@
+package com.example.node.startup;
+
+public class BootsTrapper {
+
+	public static void main(String[] args) {
+		
+	}
+}

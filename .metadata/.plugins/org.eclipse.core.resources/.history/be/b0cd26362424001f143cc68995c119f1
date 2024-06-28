@@ -1,0 +1,23 @@
+package com.example.databasefailover;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+
+public class JettyServer {
+    public static void main(String[] args) throws Exception {
+        Server server = new Server(8080);
+
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        server.setHandler(context);
+
+        // Create a ServletHolder and set the servlet
+        ServletHolder servletHolder = new ServletHolder();
+        servletHolder.setServlet(new DatabaseServlet());
+        context.addServlet(servletHolder, "/database");
+
+        server.start();
+        server.join();
+    }
+}

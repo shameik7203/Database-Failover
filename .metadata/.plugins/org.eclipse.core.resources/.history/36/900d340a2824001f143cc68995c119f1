@@ -1,0 +1,25 @@
+package com.example.databasefailover;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.MongoException;
+
+public class MongoDBConnection {
+    private static final String CONNECTION_STRING = "mongodb://localhost:27017";
+    private static final String DATABASE_NAME = "mydatabase";
+
+    public static MongoDatabase getDatabase() {
+        MongoClient mongoClient = MongoClients.create(CONNECTION_STRING);
+        return mongoClient.getDatabase(DATABASE_NAME);
+    }
+
+    public static boolean isAvailable() {
+        try {
+            getDatabase().listCollectionNames().first();
+            return true;
+        } catch (MongoException e) {
+            return false;
+        }
+    }
+}

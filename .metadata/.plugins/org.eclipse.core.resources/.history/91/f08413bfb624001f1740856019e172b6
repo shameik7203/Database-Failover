@@ -1,0 +1,31 @@
+package com.example.node.startup;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.example.databasefailover.ElasticSearchConnection;
+import com.example.databasefailover.MongoDBConnection;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
+public class BootsTrapper {
+
+	public static void main(String[] args) {
+		
+		MongoDBConnection.getInstance().createConnection();
+	}
+}
+//public class DatabaseHandler implements HttpHandler {
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        if ("POST".equals(exchange.getRequestMethod())) {
+//            InputStream requestBody = exchange.getRequestBody();
+//            byte[] requestData = readAllBytes(requestBody);
+//
+//            String data = new String(requestData);
+//
+//            boolean mongoAvailable = MongoDBConnection.getInstance().isAvailable();
+//            boolean elasticSearchAvailable = ElasticSearchConnection.getInstance().isAvailable();
+//
+//            if (mongoAvailable) {
+//                storeInMongoDB(data);

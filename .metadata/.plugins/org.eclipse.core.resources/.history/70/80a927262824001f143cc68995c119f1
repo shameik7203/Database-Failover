@@ -1,0 +1,59 @@
+package com.example.databasefailover;
+
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+public class DatabaseHandler implements HttpHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        if ("POST".equals(exchange.getRequestMethod())) {
+            String data = new String(exchange.getRequestBody().readAllBytes());
+            
+            boolean mongoAvailable = MongoDBConnection.isAvailable();
+            boolean elasticSearchAvailable = ElasticSearchConnection.isAvailable();
+
+            if (mongoAvailable) {
+                storeInMongoDB(data);
+            } else if (elasticSearchAvailable) {
+                storeInElasticSearch(data);
+            } else {
+                exchange.sendResponseHeaders(503, 0);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write("Both databases are unavailable".getBytes());
+                }
+                return;
+            }
+
+            exchange.sendResponseHeaders(200, 0);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write("Data processed".getBytes());
+            }
+        } else {
+            exchange.sendResponseHeaders(405, 0);
+        }
+    }
+
+    private void storeInMongoDB(String data) {
+        MongoCollection<Document> collection = MongoDBConnection.getDatabase().getCollection("mycollection");
+        Document document = new Document("data", data);
+        collection.insertOne(document);
+    }
+
+    private void storeInElasticSearch(String data) throws IOException {
+        try (RestHighLevelClient client = ElasticSearchConnection.getClient()) {
+            IndexRequest request = new IndexRequest("myindex")
+                    .source("data", data);
+            IndexResponse response = client.index(request, RequestOptions.DEFAULT);
+        }
+    }
+}
+

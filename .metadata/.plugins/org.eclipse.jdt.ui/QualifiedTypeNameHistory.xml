@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="com.example.databasefailover.MongoDBConnection"/>
+    <fullyQualifiedTypeName name="com.example.databasefailover.ElasticSearchConnection"/>
+    <fullyQualifiedTypeName name="com.example.databasefailover.DatabaseHandler"/>
+</qualifiedTypeNameHistroy>
