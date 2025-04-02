@@ -1,6 +1,5 @@
-# Database_Failover
-# Database_Failover
-Database Failover System
+
+#Database Failover System
 
 Overview
 
